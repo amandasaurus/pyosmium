@@ -483,16 +483,26 @@ class ReplicationServer:
             i.e. the state file in the root directory of the replication
             service.
         """
+        # Canonicalize the baseurl
+        # Try to avoid calling `example.com/area-updates//state.txt`
+        baseurl_wo_slash = self.baseurl
+        while baseurl_wo_slash[-1] == "/":
+            baseurl_wo_slash = baseurl_wo_slash[:-1]
+
         if seq is None:
-            return self.baseurl + '/state.txt'
+            return baseurl_wo_slash + '/state.txt'
 
         return '%s/%03i/%03i/%03i.state.txt' % \
-               (self.baseurl, seq / 1000000, (seq % 1000000) / 1000, seq % 1000)
+               (baseurl_wo_slash, seq / 1000000, (seq % 1000000) / 1000, seq % 1000)
 
     def get_diff_url(self, seq: int) -> str:
         """ Returns the URL to the diff file for the given sequence id.
         """
+        baseurl_wo_slash = self.baseurl
+        while baseurl_wo_slash[-1] == "/":
+            baseurl_wo_slash = baseurl_wo_slash[:-1]
+
         return '%s/%03i/%03i/%03i.%s' % \
-               (self.baseurl,
+               (baseurl_wo_slash,
                 seq / 1000000, (seq % 1000000) / 1000, seq % 1000,
                 self.diff_type)
